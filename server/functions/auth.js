@@ -1,4 +1,3 @@
-
 const dbpool = require("../database/db")
 //var nanoid = require('nanoid');
 const bcrypt = require("./../util/bcrypt");
@@ -79,8 +78,110 @@ register = (data) => {
   })
 };
 
+login = (data) => {
+  return new Promise(async (resolve, reject) => {
+    dbpool.getConnection((err, connection) => {
+      if (err) {
+        //authLogger.error('login - ' + data.emailorphone + ' database connection failed with error = ' + JSON.stringify(err))
+        return reject({ status: 'failed', error: err, data: { bResult: false } });
+      } else {
+        connection.query({
+          sql: 'SELECT * FROM `users` WHERE `email` = ?;',
+          timeout: 40000,
+          values: [data.email]
+        }, async (error, results) => {
+          if (error) {
+            //authLogger.error('login - ' + data.emailorphone + ' data find failed of query1 with error = ' + JSON.stringify(error))
+            connection.release();
+            return reject({ status: 'failed', error: error, data: { bResult: false } });
+          } else {
+            var resultsHack = JSON.parse(JSON.stringify(results))
+            if (resultsHack.length) {
+              var user = resultsHack[0]
 
+              //compare passwords
+              var comparePasswordResponse = await bcrypt.comparePassword({ inputPassword: data.password, databasePassword: user.password })
+              //if success
+              if (comparePasswordResponse.msg) {
+                var jwtData = { id: user.id }
+                var jwtResponse = await jwt.jwtCreate({ data: jwtData, expiry: 31536000 })
+                if (jwtResponse.msg) {
+                  connection.query({
+                    sql: 'UPDATE `users` SET `auth_token` = ? WHERE `id` = ?;',
+                    timeout: 40000,
+                    values: [jwtResponse.msg, user.id]
+                  }, async (error, results) => {
+                    if (error) {
+                      //authLogger.error('login - ' + data.emailorphone + ' data update failed of query2 with error = ' + JSON.stringify(error))
+                      connection.release();
+                      return reject({ status: 'failed', error: error, data: { bResult: false } });
+                    } else {
+                      connection.release();
+                      return resolve({ status: 'success', msg: 'login successful', data: { token: jwtResponse.msg, bResult: false } });
+                    }
+                  })
+
+                } else {
+                  // authLogger.error('login - ' + data.emailorphone + ' jwt create failed with error = ' + JSON.stringify(jwtResponse.error))
+                  connection.release();
+                  return reject({ status: 'failed', error: jwtResponse.error, data: { bResult: false } });
+                }
+
+              } else {
+                connection.release();
+                return resolve({ status: 'success', msg: 'password wrong', data: { bResult: false } });
+              }
+
+            } else {
+              connection.release();
+              return resolve({ status: 'success', msg: 'email or phone invalid', data: { bResult: false } });
+            }
+          }
+        })
+      }
+    })
+
+  })
+};
+
+verifyAuthSession = (rclt) => {
+  return new Promise(async (resolve, reject) => {
+      var jwtResponse = await jwt.jwtVerify(rclt)
+      if (jwtResponse.msg) {
+          var userId = jwtResponse.msg.data.id
+          dbpool.getConnection((err, connection) => {
+              if (err) {
+                  return reject({ status: 'failed', error: err, data: { bResult: false } });
+              } else {
+                  connection.query({
+                      sql: 'SELECT * FROM `users` WHERE `auth_token` = ? AND `id` = ?;',
+                      timeout: 40000,
+                      values: [rclt, userId]
+                  }, async (error, results) => {
+                      if (error) {
+                          connection.release();
+                          return reject({ status: 'failed', error: error, data: { bResult: false } });
+                      } else {
+                          var resultsHack = JSON.parse(JSON.stringify(results))
+                          if (resultsHack.length) {
+                              connection.release();
+                              return resolve({ status: 'success', msg: 'auth session verified', data: { bResult: true } });
+                          } else {
+                              connection.release();
+                              return resolve({ status: 'success', msg: 'no active session', data: { bResult: false } });
+                          }
+                      }
+                  });
+              }
+          })
+      } else {
+          return reject({ status: 'failed', error: jwtResponse.error, data: { bResult: false } });
+      }
+  })
+};
 
 module.exports = {
-  register
+  register,
+  login,
+  verifyAuthSession
 };

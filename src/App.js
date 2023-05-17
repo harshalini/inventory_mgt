@@ -19,7 +19,7 @@ function App() {
                         <Nav className="me-auto">
                         </Nav>
                         <Nav>
-                            <Link to="/login">Login</Link>
+                            <Link className='mx-4' to="/login">Login</Link>
                             <Link to="/register">Signup</Link>
                         </Nav>
                     </Navbar.Collapse>
