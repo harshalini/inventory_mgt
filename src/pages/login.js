@@ -23,7 +23,8 @@ export const Login = () => {
                         //toggleLoader('stop')
                     } else {
                         localStorage.setItem('rclt', res.data.data.token)
-                        //window.location = process.env.PUBLIC_URL + '/'
+                        window.location = '/'
+                        alert("login successful")
                     }
                 }
             })
@@ -52,11 +53,6 @@ export const Login = () => {
                     </p> */}
 
                     <input herf="home.html" type="submit" value="LogIn" />
-
-                    <div className="signup">
-                        Don't have account?
-                        <a href="register.html">Sign up Now</a>
-                    </div>
                 </form>
             </div>
         </div>

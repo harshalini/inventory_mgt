@@ -29,7 +29,7 @@ addProductCard = (data, rclt) => {
                                     return reject({ status: 'failed', error: error, data: { bResult: false } });
                                 } else {
                                     connection.release();
-                                    return resolve({ status: 'success', msg: 'link added', data: { bResult: true } });
+                                    return resolve({ status: 'success', msg: 'card added', data: { bResult: true } });
                                 }
                             });
                         }

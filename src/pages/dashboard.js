@@ -35,10 +35,8 @@ export const Home = () => {
                             if (res.data.msg === 'invalid input fields') {
                                 alert('Please check the the fields entered..!')
 
-                            } else if (res.data.msg === 'no active plan') {
-                                alert('You do not have any active plan. Please subscribe first..!')
-
-                            } else {
+                            } 
+                            else {
                                 alert('Product added..!')
                                 window.location.reload();
                             }

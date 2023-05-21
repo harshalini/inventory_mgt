@@ -10,7 +10,7 @@ EMAIL_PASS = "PJDVSX@jkfck778";
 DATABASE_USER = MODE === 'local' ? 'root' : 'automanage_mysql';
 DATABASE_PASS = MODE === 'local' ? '' : 'PJDVSX@jkfck778';
 
-BASE_URL = MODE === 'local' ? 'http://localhost:3001' : "https://rexr.in";
+BASE_URL = MODE === 'local' ? 'http://localhost:3001' : "https://deilytapes.in";
 
 module.exports = {
     URL_CARD_IMAGES_PATH,

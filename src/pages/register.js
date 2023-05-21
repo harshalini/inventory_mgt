@@ -62,10 +62,6 @@ export const Register = () => {
                     value={user.confpass}
                     />
                     <input type="submit" value="SignUp"/>
-                   
-                <div className="signup">Already Registered?
-                    <a href="login.html">Log In </a>
-                </div>
             </form>
         </div>
     </div>
